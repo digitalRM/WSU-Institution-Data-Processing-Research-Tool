@@ -12,11 +12,6 @@ export async function fetchInstitutionData(
   await delay(50); // 50ms delay between requests
 
   try {
-    // Ensure the token is properly formatted
-    const token = bearerToken.startsWith("Bearer ")
-      ? bearerToken
-      : `Bearer ${bearerToken}`;
-
     const response = await axios.get<ApiResponse>(
       `https://worldcat.org/oclc-config/institution/search?q=local.oclcSymbol:${encodeURIComponent(
         inst
@@ -57,7 +52,7 @@ export async function fetchInstitutionData(
     }
 
     return data;
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error fetching institution data:", error);
     if (axios.isAxiosError(error)) {
       const errorData = error.response?.data;

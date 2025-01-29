@@ -36,7 +36,7 @@ export default function Home() {
   const abortControllerRef = useRef<AbortController | null>(null);
   const currentFileRef = useRef<File | null>(null);
   const currentIndexRef = useRef<number>(0);
-  const dataRef = useRef<any[]>([]);
+  const dataRef = useRef<InstitutionData[]>([]);
 
   const handleAcceptDisclaimer = () => {
     setShowDisclaimer(false);
@@ -54,7 +54,10 @@ export default function Home() {
     dataRef.current = [];
   };
 
-  const processFileData = async (jsonData: any[], startIndex: number = 0) => {
+  const processFileData = async (
+    jsonData: InstitutionData[],
+    startIndex: number = 0
+  ) => {
     if (!bearerToken || !hasAcceptedDisclaimer) return;
 
     abortControllerRef.current = new AbortController();
@@ -93,8 +96,11 @@ export default function Home() {
           ]);
 
           setProgress(Math.round(((i + 1) / total) * 100));
-        } catch (error: any) {
-          if (error.message.includes("Authentication failed")) {
+        } catch (error) {
+          if (
+            error instanceof Error &&
+            error.message.includes("Authentication failed")
+          ) {
             alert(
               "Authentication failed. Please check your token and try again."
             );
@@ -145,8 +151,8 @@ export default function Home() {
       setIsProcessing(false);
       currentIndexRef.current = 0;
       dataRef.current = [];
-    } catch (error: any) {
-      if (error.message !== "Processing aborted") {
+    } catch (error) {
+      if (error instanceof Error && error.message !== "Processing aborted") {
         console.error("Error processing file:", error);
         alert("Error processing file. Please try again.");
       }
