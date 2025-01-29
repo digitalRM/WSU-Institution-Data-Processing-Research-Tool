@@ -246,7 +246,7 @@ export default function Home() {
             and requires that you have access to the API. This tool is entirely
             open source and available on{" "}
             <a
-              href="https://github.com/wsu-ukrainian-book-project/institution-data-processing-research-tool"
+              href="https://github.com/digitalRM/WSU-Institution-Data-Processing-Research-Tool"
               target="_blank"
               className="text-blue-600 hover:underline"
             >
