@@ -398,7 +398,7 @@ export default function Home() {
             <div className="text-sm text-neutral-600">
               © {new Date().getFullYear()} ·{" "}
               <a
-                href="https://github.com/wsu-ukrainian-book-project/institution-data-processing-research-tool"
+                href="https://github.com/digitalRM/WSU-Institution-Data-Processing-Research-Tool"
                 target="_blank"
                 className="hover:underline"
               >
