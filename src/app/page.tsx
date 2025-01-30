@@ -301,7 +301,7 @@ export default function Home() {
                           const file = e.target.files?.[0];
                           if (file) processFile(file);
                         }}
-                        className={`block w-fit mt-2 text-sm text-neutral-500
+                        className={`block w-fit max-w-[80vw] mt-2 text-sm text-neutral-500
                         file:mr-4 file:py-2 file:px-4
                         file:rounded-full file:border-0
                         file:text-sm file:font-semibold
