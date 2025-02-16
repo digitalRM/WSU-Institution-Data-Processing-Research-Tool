@@ -327,7 +327,7 @@ export default function Home() {
                       sideOffset={-60}
                       className="bg-blue-50 text-blue-700 border border-blue-100"
                     >
-                      <p className="tracking-tight">
+                      <p className="">
                         Please enter your Bearer Token or Access Token to enable
                         file upload
                       </p>
