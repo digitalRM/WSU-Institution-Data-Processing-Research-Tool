@@ -46,6 +46,9 @@ export default function LogTable({ logs }: LogTableProps) {
             <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
               Type
             </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+              Library Type
+            </th>
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-neutral-200">
@@ -83,6 +86,9 @@ export default function LogTable({ logs }: LogTableProps) {
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-900">
                 {log.libTypeUser}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-900">
+                {log.libraryType}
               </td>
             </tr>
           ))}

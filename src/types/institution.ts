@@ -3,6 +3,7 @@ export interface InstitutionData {
   latitude: string | null;
   longitude: string | null;
   libTypeUser: string | null;
+  libraryType: string | null;
   institutionName: string | null;
   City: string | null;
   State: string | null;
