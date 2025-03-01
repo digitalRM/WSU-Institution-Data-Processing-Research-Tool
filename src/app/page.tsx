@@ -6,6 +6,7 @@ import { InstitutionData } from "@/types/institution";
 import { fetchInstitutionData } from "@/utils/institutionApi";
 import LogTable from "@/components/LogTable";
 import DisclaimerModal from "@/components/DisclaimerModal";
+import DebugMenu from "@/components/DebugMenu";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { StopIcon } from "@heroicons/react/24/solid";
@@ -373,9 +374,16 @@ export default function Home() {
             )}
           </div>
 
+          {/* <div className="w-full">
+            <DebugMenu
+              bearerToken={bearerToken}
+              hasAcceptedDisclaimer={hasAcceptedDisclaimer}
+            />
+          </div> */}
+
           <LogTable logs={logs} />
 
-          <div className="mt-8 flex justify-between flex-col lg:flex-row gap-4">
+          <div className="mt-6 flex justify-between flex-col lg:flex-row gap-4">
             <p className="text-sm text-neutral-600">
               A tool by{" "}
               <a

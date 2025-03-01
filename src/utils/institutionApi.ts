@@ -44,26 +44,62 @@ function mapLibraryType(libTypeUser: string): string {
 export async function fetchInstitutionData(
   inst: string,
   bearerToken: string
-): Promise<Partial<InstitutionData>> {
+): Promise<Partial<InstitutionData> & { debug?: any }> {
   const maxRetries = 3;
   let currentRetry = 0;
   let waitTime = 100;
+
+  // Define the type for attempt info
+  type AttemptInfo = {
+    attempt: number;
+    url: string;
+    timestamp: string;
+    status: string;
+    statusCode?: number;
+    hasEntry?: boolean;
+    responseData?: any;
+    errorStatus?: number;
+    errorData?: any;
+    errorMessage?: string;
+  };
+
+  // Debug information
+  const debugInfo = {
+    originalCode: inst,
+    encodedCode: encodeURIComponent(inst),
+    attempts: [] as AttemptInfo[],
+    finalStatus: "unknown",
+  };
 
   while (currentRetry < maxRetries) {
     try {
       await delay(waitTime);
 
-      const response = await axios.get<ApiResponse>(
-        `https://worldcat.org/oclc-config/institution/search?q=local.oclcSymbol:${encodeURIComponent(
-          inst
-        )}`,
-        {
-          headers: {
-            Accept: "application/json",
-            Authorization: `Bearer ${bearerToken}`,
-          },
-        }
-      );
+      // Create the URL with proper encoding
+      const url = `https://worldcat.org/oclc-config/institution/search?q=local.oclcSymbol:"${encodeURIComponent(
+        inst
+      )}"`;
+
+      // Add attempt to debug info
+      const attemptInfo: AttemptInfo = {
+        attempt: currentRetry + 1,
+        url,
+        timestamp: new Date().toISOString(),
+        status: "pending",
+      };
+
+      debugInfo.attempts.push(attemptInfo);
+
+      const response = await axios.get<ApiResponse>(url, {
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${bearerToken}`,
+        },
+      });
+
+      // Update attempt status
+      attemptInfo.status = "success";
+      attemptInfo.statusCode = response.status;
 
       // Create default data with "NoneFound" for all fields
       const data = {
@@ -82,6 +118,10 @@ export async function fetchInstitutionData(
       const entry =
         response.data?.entries?.[0]?.content?.institution?.nameLocation;
 
+      // Add response data to debug info
+      attemptInfo.hasEntry = !!entry;
+      attemptInfo.responseData = response.data;
+
       if (entry) {
         data.latitude = entry.mainAddress?.latitude ?? "NoneFound";
         data.longitude = entry.mainAddress?.longitude ?? "NoneFound";
@@ -96,8 +136,26 @@ export async function fetchInstitutionData(
         data.postalCd = entry.mainAddress?.postalCd ?? "NoneFound";
       }
 
-      return data;
+      // Set final status in debug info
+      debugInfo.finalStatus = "success";
+
+      // Always include debug info
+      return { ...data, debug: debugInfo };
     } catch (error) {
+      // Update the current attempt with error information
+      if (debugInfo.attempts.length > 0) {
+        const currentAttempt =
+          debugInfo.attempts[debugInfo.attempts.length - 1];
+        currentAttempt.status = "error";
+
+        if (axios.isAxiosError(error)) {
+          currentAttempt.errorStatus = error.response?.status;
+          currentAttempt.errorData = error.response?.data;
+        } else if (error instanceof Error) {
+          currentAttempt.errorMessage = error.message;
+        }
+      }
+
       console.error("Error fetching institution data:", error);
       if (axios.isAxiosError(error)) {
         const errorData = error.response?.data;
@@ -122,11 +180,20 @@ export async function fetchInstitutionData(
               ? errorData
               : errorData?.message ||
                 "Authentication failed. Please check your token.";
-          throw new Error(errorMessage);
+
+          debugInfo.finalStatus = "auth_error";
+
+          // Include debug info in the error
+          const enhancedError = new Error(errorMessage);
+          (enhancedError as any).debug = debugInfo;
+          throw enhancedError;
         }
       }
 
       // If we've exhausted retries or it's not a 429 error, return NoneFound values
+      debugInfo.finalStatus = "failed";
+
+      // Always include debug info
       return {
         latitude: "NoneFound",
         longitude: "NoneFound",
@@ -137,11 +204,15 @@ export async function fetchInstitutionData(
         State: "NoneFound",
         Country: "NoneFound",
         postalCd: "NoneFound",
+        debug: debugInfo,
       };
     }
   }
 
   // If we've exhausted all retries
+  debugInfo.finalStatus = "max_retries_exceeded";
+
+  // Always include debug info
   return {
     latitude: "NoneFound",
     longitude: "NoneFound",
@@ -152,5 +223,6 @@ export async function fetchInstitutionData(
     State: "NoneFound",
     Country: "NoneFound",
     postalCd: "NoneFound",
+    debug: debugInfo,
   };
 }
