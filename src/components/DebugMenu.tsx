@@ -4,11 +4,33 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { fetchInstitutionData } from "@/utils/institutionApi";
 import { InstitutionData } from "@/types/institution";
-import { ChevronUp, PencilRuler, Search } from "lucide-react";
+import { ChevronUp, Search } from "lucide-react";
 
 interface DebugMenuProps {
   bearerToken: string;
   hasAcceptedDisclaimer: boolean;
+}
+
+interface DebugInfo {
+  originalCode: string;
+  encodedCode: string;
+  attempts: Array<{
+    attempt: number;
+    url: string;
+    timestamp: string;
+    status: string;
+    statusCode?: number;
+    hasEntry?: boolean;
+    responseData?: unknown;
+    errorStatus?: number;
+    errorData?: unknown;
+    errorMessage?: string;
+  }>;
+  finalStatus: string;
+}
+
+interface DebugResult extends Partial<InstitutionData> {
+  debug?: DebugInfo;
 }
 
 export default function DebugMenu({
@@ -17,9 +39,7 @@ export default function DebugMenu({
 }: DebugMenuProps) {
   const [institutionCode, setInstitutionCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [result, setResult] = useState<
-    (Partial<InstitutionData> & { debug?: any }) | null
-  >(null);
+  const [result, setResult] = useState<DebugResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [showRawResponse, setShowRawResponse] = useState(false);
@@ -40,8 +60,9 @@ export default function DebugMenu({
     } catch (err) {
       const error = err as Error;
       setError(error.message);
-      if ((error as any).debug) {
-        setResult({ debug: (error as any).debug });
+      const errorWithDebug = err as { debug?: DebugInfo };
+      if (errorWithDebug.debug) {
+        setResult({ debug: errorWithDebug.debug });
       }
     } finally {
       setIsLoading(false);
@@ -184,49 +205,47 @@ export default function DebugMenu({
                             {result.debug.attempts.length}
                           </p>
 
-                          {result.debug.attempts.map(
-                            (attempt: any, index: number) => (
-                              <div
-                                key={index}
-                                className="mt-2 p-2 bg-neutral-50 rounded border border-neutral-100"
-                              >
+                          {result.debug.attempts.map((attempt, index) => (
+                            <div
+                              key={index}
+                              className="mt-2 p-2 bg-neutral-50 rounded border border-neutral-100"
+                            >
+                              <p>
+                                <span className="font-medium">
+                                  Attempt {attempt.attempt}:
+                                </span>{" "}
+                                {attempt.status}
+                              </p>
+                              {attempt.statusCode && (
                                 <p>
                                   <span className="font-medium">
-                                    Attempt {attempt.attempt}:
+                                    Status Code:
                                   </span>{" "}
-                                  {attempt.status}
+                                  {attempt.statusCode}
                                 </p>
-                                {attempt.statusCode && (
-                                  <p>
-                                    <span className="font-medium">
-                                      Status Code:
-                                    </span>{" "}
-                                    {attempt.statusCode}
-                                  </p>
-                                )}
-                                {attempt.errorStatus && (
-                                  <p>
-                                    <span className="font-medium">
-                                      Error Status:
-                                    </span>{" "}
-                                    {attempt.errorStatus}
-                                  </p>
-                                )}
-                                {attempt.hasEntry !== undefined && (
-                                  <p>
-                                    <span className="font-medium">
-                                      Found Entry:
-                                    </span>{" "}
-                                    {attempt.hasEntry ? "Yes" : "No"}
-                                  </p>
-                                )}
-                                <p className="text-xs truncate">
-                                  <span className="font-medium">URL:</span>{" "}
-                                  {attempt.url}
+                              )}
+                              {attempt.errorStatus && (
+                                <p>
+                                  <span className="font-medium">
+                                    Error Status:
+                                  </span>{" "}
+                                  {attempt.errorStatus}
                                 </p>
-                              </div>
-                            )
-                          )}
+                              )}
+                              {attempt.hasEntry !== undefined && (
+                                <p>
+                                  <span className="font-medium">
+                                    Found Entry:
+                                  </span>{" "}
+                                  {attempt.hasEntry ? "Yes" : "No"}
+                                </p>
+                              )}
+                              <p className="text-xs truncate">
+                                <span className="font-medium">URL:</span>{" "}
+                                {attempt.url}
+                              </p>
+                            </div>
+                          ))}
                         </div>
                       </div>
                     )}

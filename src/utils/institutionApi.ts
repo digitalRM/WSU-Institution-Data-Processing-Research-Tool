@@ -41,33 +41,45 @@ function mapLibraryType(libTypeUser: string): string {
   return typeMap[libTypeUser] || "Unknown";
 }
 
+interface DebugInfo {
+  originalCode: string;
+  encodedCode: string;
+  attempts: Array<{
+    attempt: number;
+    url: string;
+    timestamp: string;
+    status: "pending" | "success" | "error";
+    statusCode?: number;
+    hasEntry?: boolean;
+    responseData?: unknown;
+    errorStatus?: number;
+    errorData?: unknown;
+    errorMessage?: string;
+  }>;
+  finalStatus: string;
+}
+
+interface DebugResult extends Partial<InstitutionData> {
+  debug?: DebugInfo;
+}
+
+interface ErrorWithDebug extends Error {
+  debug?: DebugInfo;
+}
+
 export async function fetchInstitutionData(
   inst: string,
   bearerToken: string
-): Promise<Partial<InstitutionData> & { debug?: any }> {
+): Promise<DebugResult> {
   const maxRetries = 3;
   let currentRetry = 0;
   let waitTime = 100;
 
-  // Define the type for attempt info
-  type AttemptInfo = {
-    attempt: number;
-    url: string;
-    timestamp: string;
-    status: string;
-    statusCode?: number;
-    hasEntry?: boolean;
-    responseData?: any;
-    errorStatus?: number;
-    errorData?: any;
-    errorMessage?: string;
-  };
-
   // Debug information
-  const debugInfo = {
+  const debugInfo: DebugInfo = {
     originalCode: inst,
     encodedCode: encodeURIComponent(inst),
-    attempts: [] as AttemptInfo[],
+    attempts: [],
     finalStatus: "unknown",
   };
 
@@ -81,11 +93,11 @@ export async function fetchInstitutionData(
       )}"`;
 
       // Add attempt to debug info
-      const attemptInfo: AttemptInfo = {
+      const attemptInfo = {
         attempt: currentRetry + 1,
         url,
         timestamp: new Date().toISOString(),
-        status: "pending",
+        status: "pending" as const,
       };
 
       debugInfo.attempts.push(attemptInfo);
@@ -98,8 +110,9 @@ export async function fetchInstitutionData(
       });
 
       // Update attempt status
-      attemptInfo.status = "success";
-      attemptInfo.statusCode = response.status;
+      const currentAttempt = debugInfo.attempts[debugInfo.attempts.length - 1];
+      currentAttempt.status = "success";
+      currentAttempt.statusCode = response.status;
 
       // Create default data with "NoneFound" for all fields
       const data = {
@@ -119,8 +132,8 @@ export async function fetchInstitutionData(
         response.data?.entries?.[0]?.content?.institution?.nameLocation;
 
       // Add response data to debug info
-      attemptInfo.hasEntry = !!entry;
-      attemptInfo.responseData = response.data;
+      currentAttempt.hasEntry = !!entry;
+      currentAttempt.responseData = response.data;
 
       if (entry) {
         data.latitude = entry.mainAddress?.latitude ?? "NoneFound";
@@ -184,8 +197,8 @@ export async function fetchInstitutionData(
           debugInfo.finalStatus = "auth_error";
 
           // Include debug info in the error
-          const enhancedError = new Error(errorMessage);
-          (enhancedError as any).debug = debugInfo;
+          const enhancedError = new Error(errorMessage) as ErrorWithDebug;
+          enhancedError.debug = debugInfo;
           throw enhancedError;
         }
       }
