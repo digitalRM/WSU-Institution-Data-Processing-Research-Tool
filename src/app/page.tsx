@@ -213,7 +213,7 @@ export default function Home() {
       />
 
       <div className="min-h-screen bg-neutral-50 p-4 lg:p-8">
-        <main className="max-w-5xl mx-auto">
+        <main className="max-w-7xl mx-auto">
           <h1 className="text-2xl font-semibold text-black mb-4 mt-4 md:mt-8 tracking-tight">
             Institution Data Processing Research Tool
           </h1>
@@ -276,7 +276,7 @@ export default function Home() {
                   id={tokenId}
                   placeholder="Enter your token"
                   type="text"
-                  className="bg-white/50"
+                  className="bg-white/75 rounded-lg mt-2"
                   value={bearerToken}
                   onChange={(e) => setBearerToken(e.target.value)}
                   disabled={!hasAcceptedDisclaimer}
