@@ -75,7 +75,7 @@ export default function DebugMenu({
         <Button
           onClick={() => setIsOpen(true)}
           variant="outline"
-          className="text-sm tracking-tight text-neutral-600 hover:text-neutral-800 rounded-full shadow-sm h-9"
+          className="text-sm tracking-tight text-neutral-600 hover:text-neutral-800 rounded-full shadow-xs h-9"
         >
           <Search className="w-4 h-4 mr-2" />
           Open Individual Lookup
@@ -85,7 +85,7 @@ export default function DebugMenu({
   }
 
   return (
-    <div className="mt-6 bg-white rounded-2xl shadow-sm border border-neutral-200">
+    <div className="mt-6 bg-white rounded-2xl shadow-xs border border-neutral-200">
       <div className="p-5 pb-4 rounded-t-2xl bg-neutral-50/50 flex justify-between items-center">
         <h2 className=" font-medium tracking-tight text-neutral-900">
           Search Institution

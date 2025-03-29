@@ -12,7 +12,7 @@ export default function LogTable({ logs }: LogTableProps) {
   if (logs.length === 0) return null;
 
   return (
-    <div className="mt-4 overflow-x-auto rounded-2xl border border-neutral-200 shadow-sm">
+    <div className="mt-4 overflow-x-auto rounded-2xl border border-neutral-200 shadow-xs">
       <table className="min-w-full divide-y divide-neutral-200">
         <thead className="bg-neutral-50">
           <tr>

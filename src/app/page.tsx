@@ -255,7 +255,7 @@ export default function Home() {
             .
           </p>
 
-          <div className="bg-white rounded-2xl shadow-sm border border-neutral-200">
+          <div className="bg-white rounded-2xl shadow-xs border border-neutral-200">
             <div className="p-5 pb-6 rounded-t-2xl bg-neutral-50/50">
               <div className="space-y-2 relative">
                 <Label htmlFor={tokenId} className="">
